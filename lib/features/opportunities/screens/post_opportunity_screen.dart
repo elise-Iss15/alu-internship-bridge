@@ -24,6 +24,7 @@ class _PostOpportunityScreenState extends ConsumerState<PostOpportunityScreen> {
   String _selectedRoleType = 'Software Development';
   final List<String> _skills = [];
   bool _isSubmitting = false;
+  String? _errorMessage;
 
   final _roleTypes = const [
     'Software Development',
@@ -51,18 +52,30 @@ class _PostOpportunityScreenState extends ConsumerState<PostOpportunityScreen> {
         _descController.text.trim().isEmpty) {
       return;
     }
-    setState(() => _isSubmitting = true);
-    await ref
-        .read(opportunityRepositoryProvider)
-        .createOpportunity(
-          startupId: widget.startupId,
-          startupName: widget.startupName,
-          title: _titleController.text.trim(),
-          description: _descController.text.trim(),
-          roleType: _selectedRoleType,
-          skillsNeeded: _skills,
-        );
-    if (mounted) Navigator.of(context).pop();
+    setState(() {
+      _isSubmitting = true;
+      _errorMessage = null;
+    });
+    try {
+      await ref
+          .read(opportunityRepositoryProvider)
+          .createOpportunity(
+            startupId: widget.startupId,
+            startupName: widget.startupName,
+            title: _titleController.text.trim(),
+            description: _descController.text.trim(),
+            roleType: _selectedRoleType,
+            skillsNeeded: _skills,
+          );
+      if (mounted) Navigator.of(context).pop();
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+          _errorMessage = e.toString();
+        });
+      }
+    }
   }
 
   @override
@@ -144,6 +157,15 @@ class _PostOpportunityScreenState extends ConsumerState<PostOpportunityScreen> {
               ElevatedButton(
                 onPressed: _submit,
                 child: const Text('Post opportunity'),
+              ),
+            if (_errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Text(
+                  _errorMessage!,
+                  style: const TextStyle(color: AppColors.error),
+                  textAlign: TextAlign.center,
+                ),
               ),
           ],
         ),

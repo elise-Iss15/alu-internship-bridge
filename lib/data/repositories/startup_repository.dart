@@ -23,6 +23,7 @@ class StartupRepository {
     required String description,
   }) async {
     await _db.collection('startups').doc(startupId).set({
+      'ownerId': startupId,
       'name': name,
       'description': description,
       'status': 'pending',

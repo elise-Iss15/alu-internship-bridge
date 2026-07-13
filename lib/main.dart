@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'ALU Internship Bridge',
       theme: AppTheme.light,
+      debugShowCheckedModeBanner: false,
       home: const AppRouter(),
     );
   }
